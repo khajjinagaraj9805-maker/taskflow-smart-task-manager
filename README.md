@@ -18,3 +18,34 @@ pip install -r requirements.txt
 
 ### Run
 python app.py
+
+# Screenshots
+
+## Login Page
+
+![Login](static/screenshots/login.png)
+
+---
+
+## Register Page
+
+![Register](static/screenshots/register.png)
+
+---
+
+## Dashboard
+
+![Dashboard](static/screenshots/dashboard.png)
+
+---
+
+## Add Task
+
+![Add Task](static/screenshots/add-task.png)
+
+---
+
+## Edit Task
+
+![Edit Task](static/screenshots/edit-task.png)
+
