@@ -49,3 +49,7 @@ python app.py
 
 ![Edit Task](static/screenshots/edit-task.png)
 
+## Clone Repository
+
+```bash
+git clone https://github.com/khajjinagaraj9805-maker/taskflow-smart-task-manager.git
