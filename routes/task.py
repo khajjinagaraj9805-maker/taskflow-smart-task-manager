@@ -1,7 +1,11 @@
 from flask import Blueprint, render_template, request, redirect, jsonify
 from flask_login import current_user, login_required
 from models import db, Task
+
+import pandas as pd
 import numpy as np
+
+from extensions import socketio
 
 task_bp = Blueprint('task', __name__)
 
@@ -16,27 +20,36 @@ def dashboard():
         user_id=current_user.id
     ).all()
 
-    total = len(tasks)
+    task_data = []
 
-    completed = len(
-        [t for t in tasks if t.status == 'Completed']
-    )
+    for task in tasks:
 
-    pending = total - completed
+        task_data.append({
+            "title": task.title,
+            "status": task.status
+        })
 
-    completion_percentage = 0
+    df = pd.DataFrame(task_data)
 
-    if total > 0:
+    total = len(df)
 
-        completion_percentage = np.round(
-            (completed / total) * 100,
-            2
-        )
+    completed = np.sum(
+        df["status"] == "Completed"
+    ) if total > 0 else 0
+
+    pending = np.sum(
+        df["status"] == "Pending"
+    ) if total > 0 else 0
+
+    completion_percentage = round(
+        (completed / total) * 100,
+        2
+    ) if total > 0 else 0
 
     analytics = {
-        "total": total,
-        "completed": completed,
-        "pending": pending,
+        "total": int(total),
+        "completed": int(completed),
+        "pending": int(pending),
         "completion_percentage": completion_percentage
     }
 
@@ -68,7 +81,12 @@ def add_task():
 
     # ================= SOCKET NOTIFICATION =================
 
-    print(f"New Task Added: {task.title}")
+    socketio.emit(
+        'task_notification',
+        {
+            'message': f'✅ New Task Added: {task.title}'
+        }
+    )
 
     return redirect('/dashboard')
 
@@ -96,6 +114,13 @@ def edit_task(id):
 
         db.session.commit()
 
+        socketio.emit(
+            'task_notification',
+            {
+                'message': f'✏️ Task Updated: {task.title}'
+            }
+        )
+
         return redirect('/dashboard')
 
     return render_template(
@@ -115,6 +140,13 @@ def delete_task(id):
         user_id=current_user.id
     ).first()
 
+    socketio.emit(
+        'task_notification',
+        {
+            'message': f'❌ Task Deleted: {task.title}'
+        }
+    )
+
     db.session.delete(task)
 
     db.session.commit()
@@ -122,7 +154,7 @@ def delete_task(id):
     return redirect('/dashboard')
 
 
-# ================= API =================
+# ================= GET TASKS API =================
 
 @task_bp.route('/api/tasks')
 @login_required
@@ -141,7 +173,102 @@ def get_tasks():
             "title": task.title,
             "description": task.description,
             "priority": task.priority,
-            "status": task.status
+            "status": task.status,
+            "created_date": task.created_date
         })
 
     return jsonify(data)
+
+
+# ================= ADD TASK API =================
+
+@task_bp.route('/api/add_task', methods=['POST'])
+@login_required
+def api_add_task():
+
+    data = request.json
+
+    task = Task(
+        title=data['title'],
+        description=data['description'],
+        priority=data['priority'],
+        status=data['status'],
+        user_id=current_user.id
+    )
+
+    db.session.add(task)
+
+    db.session.commit()
+
+    socketio.emit(
+        'task_notification',
+        {
+            'message': f'✅ API Task Added: {task.title}'
+        }
+    )
+
+    return jsonify({
+        "message": "Task Added Successfully"
+    })
+
+
+# ================= UPDATE TASK API =================
+
+@task_bp.route('/api/update_task/<int:id>', methods=['PUT'])
+@login_required
+def api_update_task(id):
+
+    task = Task.query.filter_by(
+        id=id,
+        user_id=current_user.id
+    ).first()
+
+    data = request.json
+
+    task.title = data['title']
+
+    task.description = data['description']
+
+    task.priority = data['priority']
+
+    task.status = data['status']
+
+    db.session.commit()
+
+    socketio.emit(
+        'task_notification',
+        {
+            'message': f'✏️ API Task Updated: {task.title}'
+        }
+    )
+
+    return jsonify({
+        "message": "Task Updated Successfully"
+    })
+
+
+# ================= DELETE TASK API =================
+
+@task_bp.route('/api/delete_task/<int:id>', methods=['DELETE'])
+@login_required
+def api_delete_task(id):
+
+    task = Task.query.filter_by(
+        id=id,
+        user_id=current_user.id
+    ).first()
+
+    socketio.emit(
+        'task_notification',
+        {
+            'message': f'❌ API Task Deleted: {task.title}'
+        }
+    )
+
+    db.session.delete(task)
+
+    db.session.commit()
+
+    return jsonify({
+        "message": "Task Deleted Successfully"
+    })

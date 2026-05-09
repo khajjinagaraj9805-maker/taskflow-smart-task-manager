@@ -53,8 +53,6 @@ class Task(db.Model):
         default=datetime.utcnow
     )
 
-    # USER LINK
-
     user_id = db.Column(
         db.Integer,
         db.ForeignKey('user.id'),

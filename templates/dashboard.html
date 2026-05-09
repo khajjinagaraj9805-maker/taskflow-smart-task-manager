@@ -56,7 +56,7 @@
 
         </div>
 
-        <!-- Dynamic Profile -->
+        <!-- Profile -->
 
         <div class="profile-card">
 
@@ -80,9 +80,11 @@
 
     </div>
 
-    <!-- Content -->
+    <!-- Main Content -->
 
     <div class="content">
+
+        <!-- Topbar -->
 
         <div class="topbar">
 
@@ -154,7 +156,7 @@
 
         </div>
 
-        <!-- Add Task Form -->
+        <!-- Add Task -->
 
         <div class="glass-card">
 
@@ -163,9 +165,7 @@
                 Add New Task
             </h2>
 
-            <form id="taskForm"
-                  action="/add_task"
-                  method="POST">
+            <form id="taskForm">
 
                 <div class="row g-3">
 
@@ -224,7 +224,7 @@
 
         </div>
 
-        <!-- Tasks -->
+        <!-- Task Cards -->
 
         <div class="task-wrapper">
 
@@ -276,6 +276,15 @@
                             {{ task.description }}
                         </p>
 
+                        <small class="text-light">
+
+                            Created:
+                            {{ task.created_date.strftime('%d %b %Y') }}
+
+                        </small>
+
+                        <br><br>
+
                         {% if task.status == "Completed" %}
 
                             <span class="status completed">
@@ -297,16 +306,16 @@
                             <a href="/edit_task/{{ task.id }}"
                                class="btn btn-primary w-50">
 
-                               <i class="fa-solid fa-pen"></i>
-                               Edit
+                                <i class="fa-solid fa-pen"></i>
+                                Edit
 
                             </a>
 
                             <a href="/delete_task/{{ task.id }}"
                                class="btn delete-btn w-50">
 
-                               <i class="fa-solid fa-trash"></i>
-                               Delete
+                                <i class="fa-solid fa-trash"></i>
+                                Delete
 
                             </a>
 
@@ -326,33 +335,51 @@
 
 </div>
 
-<!-- Notification Script -->
-
 <!-- Toast Notification -->
 
-<div id="toastNotification" class="toast-box">
+<div id="toastNotification" class="toast-box"></div>
 
-    ✅ Task Added Successfully 🚀
+<!-- SOCKET.IO -->
 
-</div>
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 
 <script>
 
-document
-.getElementById("taskForm")
-.addEventListener("submit", function(event){
+const socket = io();
 
-    event.preventDefault();
+const form = document.getElementById("taskForm");
+
+form.addEventListener("submit", async function(e){
+
+    e.preventDefault();
+
+    const formData = new FormData(form);
+
+    await fetch("/add_task", {
+
+        method: "POST",
+
+        body: formData
+
+    });
+
+});
+
+socket.on('task_notification', function(data){
 
     const toast = document.getElementById("toastNotification");
+
+    toast.innerHTML = data.message;
 
     toast.classList.add("show-toast");
 
     setTimeout(() => {
 
-        event.target.submit();
+        toast.classList.remove("show-toast");
 
-    }, 1200);
+        location.reload();
+
+    }, 2500);
 
 });
 

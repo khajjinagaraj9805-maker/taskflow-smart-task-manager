@@ -505,3 +505,71 @@ input::placeholder{
     transform: translateY(0);
 
 }
+.toast-box{
+
+    position: fixed;
+
+    top: 20px;
+
+    right: 20px;
+
+    background: #6c5ce7;
+
+    color: white;
+
+    padding: 15px 25px;
+
+    border-radius: 12px;
+
+    font-weight: bold;
+
+    opacity: 0;
+
+    transform: translateY(-20px);
+
+    transition: 0.4s;
+
+    z-index: 9999;
+
+    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+}
+
+.show-toast{
+
+    opacity: 1;
+
+    transform: translateY(0);
+}
+.toast-box{
+
+    position: fixed;
+
+    top: 20px;
+
+    right: 20px;
+
+    background: #6c5ce7;
+
+    color: white;
+
+    padding: 15px 25px;
+
+    border-radius: 10px;
+
+    font-weight: bold;
+
+    opacity: 0;
+
+    transform: translateY(-20px);
+
+    transition: 0.4s;
+
+    z-index: 9999;
+}
+
+.show-toast{
+
+    opacity: 1;
+
+    transform: translateY(0);
+}

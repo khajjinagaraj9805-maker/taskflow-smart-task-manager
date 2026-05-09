@@ -1,11 +1,11 @@
 from flask import Flask
-from flask_socketio import SocketIO
 from flask_login import LoginManager
 from config import Config
 from models import db, User
 
+from extensions import socketio
+
 from routes.auth import auth_bp
-from routes.task import task_bp
 
 # ================= APP =================
 
@@ -19,7 +19,7 @@ db.init_app(app)
 
 # ================= SOCKET =================
 
-socketio = SocketIO(app)
+socketio.init_app(app)
 
 # ================= LOGIN =================
 
@@ -35,6 +35,10 @@ def load_user(user_id):
 
     return User.query.get(int(user_id))
 
+
+# ================= IMPORT ROUTES =================
+
+from routes.task import task_bp
 
 # ================= BLUEPRINTS =================
 
