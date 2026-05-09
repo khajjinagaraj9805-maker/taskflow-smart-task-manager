@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>TaskFlow Dashboard</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <link rel="stylesheet"
+          href="/static/style.css">
+
+</head>
+
+<body>
+
+<div class="main-container">
+
+    <!-- Sidebar -->
+
+    <div class="sidebar">
+
+        <div>
+
+            <h2 class="logo">
+                <i class="fa-solid fa-clipboard-check"></i>
+                TaskFlow
+            </h2>
+
+            <p class="subtitle">
+                Smart Task Manager
+            </p>
+
+            <div class="menu">
+
+                <a href="#" class="active">
+                    <i class="fa-solid fa-house"></i>
+                    Dashboard
+                </a>
+
+                <a href="/logout">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    Logout
+                </a>
+
+            </div>
+
+        </div>
+
+        <!-- Dynamic Profile -->
+
+        <div class="profile-card">
+
+            <div class="avatar">
+                {{ user.username[0].upper() }}
+            </div>
+
+            <div>
+
+                <h5>
+                    {{ user.username }}
+                </h5>
+
+                <p>
+                    Task Manager User
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Content -->
+
+    <div class="content">
+
+        <div class="topbar">
+
+            <div>
+
+                <h1>
+                    Smart Task Dashboard 👋
+                </h1>
+
+                <p>
+                    Welcome back, {{ user.username }}!
+                </p>
+
+            </div>
+
+            <div class="time-box">
+
+                <i class="fa-regular fa-clock"></i>
+
+                09 May 2026
+
+            </div>
+
+        </div>
+
+        <!-- Analytics -->
+
+        <div class="analytics-grid">
+
+            <div class="analytics-card blue">
+
+                <i class="fa-solid fa-layer-group"></i>
+
+                <h3>Total Tasks</h3>
+
+                <h1>{{ analytics.total }}</h1>
+
+            </div>
+
+            <div class="analytics-card green">
+
+                <i class="fa-solid fa-circle-check"></i>
+
+                <h3>Completed</h3>
+
+                <h1>{{ analytics.completed }}</h1>
+
+            </div>
+
+            <div class="analytics-card orange">
+
+                <i class="fa-solid fa-clock"></i>
+
+                <h3>Pending</h3>
+
+                <h1>{{ analytics.pending }}</h1>
+
+            </div>
+
+            <div class="analytics-card purple">
+
+                <i class="fa-solid fa-chart-line"></i>
+
+                <h3>Completion</h3>
+
+                <h1>{{ analytics.completion_percentage }}%</h1>
+
+            </div>
+
+        </div>
+
+        <!-- Add Task Form -->
+
+        <div class="glass-card">
+
+            <h2>
+                <i class="fa-solid fa-plus"></i>
+                Add New Task
+            </h2>
+
+            <form id="taskForm"
+                  action="/add_task"
+                  method="POST">
+
+                <div class="row g-3">
+
+                    <div class="col-md-4">
+
+                        <input type="text"
+                               name="title"
+                               class="form-control"
+                               placeholder="Task Title"
+                               required>
+
+                    </div>
+
+                    <div class="col-md-4">
+
+                        <input type="text"
+                               name="description"
+                               class="form-control"
+                               placeholder="Description"
+                               required>
+
+                    </div>
+
+                    <div class="col-md-2">
+
+                        <select name="priority"
+                                class="form-select">
+
+                            <option>High</option>
+                            <option>Medium</option>
+                            <option>Low</option>
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-md-2">
+
+                        <select name="status"
+                                class="form-select">
+
+                            <option>Pending</option>
+                            <option>Completed</option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+                <button class="custom-btn">
+                    Add Task
+                </button>
+
+            </form>
+
+        </div>
+
+        <!-- Tasks -->
+
+        <div class="task-wrapper">
+
+            <div class="task-header-top">
+
+                <h2>
+                    Your Tasks
+                </h2>
+
+            </div>
+
+            <div class="row">
+
+                {% for task in tasks %}
+
+                <div class="col-md-4">
+
+                    <div class="task-card">
+
+                        <div class="task-top">
+
+                            <h4>
+                                {{ task.title }}
+                            </h4>
+
+                            {% if task.priority == "High" %}
+
+                                <span class="badge bg-danger">
+                                    High
+                                </span>
+
+                            {% elif task.priority == "Medium" %}
+
+                                <span class="badge bg-warning text-dark">
+                                    Medium
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge bg-success">
+                                    Low
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+                        <p>
+                            {{ task.description }}
+                        </p>
+
+                        {% if task.status == "Completed" %}
+
+                            <span class="status completed">
+                                Completed
+                            </span>
+
+                        {% else %}
+
+                            <span class="status pending">
+                                Pending
+                            </span>
+
+                        {% endif %}
+
+                        <!-- Buttons -->
+
+                        <div class="d-flex gap-2 mt-3">
+
+                            <a href="/edit_task/{{ task.id }}"
+                               class="btn btn-primary w-50">
+
+                               <i class="fa-solid fa-pen"></i>
+                               Edit
+
+                            </a>
+
+                            <a href="/delete_task/{{ task.id }}"
+                               class="btn delete-btn w-50">
+
+                               <i class="fa-solid fa-trash"></i>
+                               Delete
+
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- Notification Script -->
+
+<!-- Toast Notification -->
+
+<div id="toastNotification" class="toast-box">
+
+    ✅ Task Added Successfully 🚀
+
+</div>
+
+<script>
+
+document
+.getElementById("taskForm")
+.addEventListener("submit", function(event){
+
+    event.preventDefault();
+
+    const toast = document.getElementById("toastNotification");
+
+    toast.classList.add("show-toast");
+
+    setTimeout(() => {
+
+        event.target.submit();
+
+    }, 1200);
+
+});
+
+</script>
+
+</body>
+
+</html>
